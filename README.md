@@ -7,7 +7,7 @@ A small app for remembering the people you meet and what they told you.
   (e.g. *"Going on holiday to Japan next month"*).
 - Search across names, taglines and meeting notes, so you can look up "Japan" and find John.
 
-**Live app:** https://jaspertwigg.github.io/names-meetings/
+**Live app:** https://jaspertwigg.github.io/Names-Meetings/
 
 ## Your data
 
