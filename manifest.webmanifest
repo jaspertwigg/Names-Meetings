@@ -1,0 +1,13 @@
+{
+  "name": "Names & Meetings",
+  "short_name": "Names",
+  "description": "Remember the people you meet and what they told you.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#3b5bdb",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

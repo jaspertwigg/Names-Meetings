@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Names &amp; Meetings</title>
+  <meta name="description" content="Remember the people you meet and what they told you.">
+  <meta name="theme-color" content="#3b5bdb">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Names">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="backBtn" class="icon-btn" aria-label="Back" hidden>&larr;</button>
+    <h1 id="title">Names &amp; Meetings</h1>
+    <button id="menuBtn" class="icon-btn" aria-label="Menu">&#8942;</button>
+  </header>
+
+  <div id="menu" class="menu" hidden>
+    <button data-action="export">Export backup</button>
+    <button data-action="import">Import backup</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+  </div>
+
+  <main id="app"></main>
+
+  <button id="fab" class="fab" aria-label="Add">+</button>
+
+  <dialog id="dialog">
+    <form id="dialogForm" method="dialog">
+      <h2 id="dialogTitle"></h2>
+      <div id="dialogBody"></div>
+      <div class="dialog-actions">
+        <button type="button" id="dialogDelete" class="danger" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" id="dialogCancel" class="secondary">Cancel</button>
+        <button type="submit" id="dialogSave" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
