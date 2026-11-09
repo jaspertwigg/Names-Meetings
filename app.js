@@ -241,6 +241,7 @@
         <button class="primary" id="addMeeting">+ Log a meeting</button>
         <button class="secondary" id="editPerson">Edit details</button>
       </div>
+      ${summaryHtml(person, meetings)}
       <div class="section-title">Meetings (${meetings.length})</div>
       ${meetings.length === 0
         ? `<div class="card empty">No meetings yet. Log one to remember what you talked about.</div>`
@@ -263,6 +264,102 @@
     app.querySelectorAll('.edit-link').forEach(btn => {
       btn.onclick = () => openMeetingDialog(person, person.meetings.find(m => m.id === btn.dataset.id));
     });
+  }
+
+  // ---------- Summary (generated on the device, nothing is sent anywhere) ----------
+  const FOLLOW_UP_RE = /\b(going|gonna|will|won't|soon|next|planning|plans?|about to|hoping|hopes?|wants? to|trying to|thinking (of|about)|starting|starts|moving|trip|holiday|vacation|travel|wedding|engaged|pregnant|expecting|baby|birthday|interview|exam|surgery|operation|new job|retir\w*|tomorrow|tonight|weekend|this (week|month|year)|upcoming|booked)\b/i;
+
+  function parseIso(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function daysBetween(a, b) {
+    return Math.round((parseIso(b) - parseIso(a)) / 86400000);
+  }
+
+  function describeGap(days) {
+    if (days < 2) return 'every day or so';
+    if (days < 10) return `every ${days} days`;
+    if (days < 45) return `every ${Math.round(days / 7)} weeks`;
+    if (days < 330) return `every ${Math.round(days / 30)} months`;
+    return 'about once a year';
+  }
+
+  function sentences(text) {
+    return (text || '')
+      .split(/\n+|(?<=[.!?])\s+/)
+      .map(s => s.trim().replace(/^[-•*]\s*/, ''))
+      .filter(s => s.length > 2);
+  }
+
+  function truncate(s, n) {
+    return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s;
+  }
+
+  function summaryHtml(person, meetings) {
+    if (meetings.length === 0) return '';
+    const first = person.name.trim().split(/\s+/)[0];
+    const latest = meetings[0];
+    const oldest = meetings[meetings.length - 1];
+    const n = meetings.length;
+
+    // Overview
+    let overview = n === 1
+      ? `You've met ${esc(first)} once, ${esc(relative(latest.date))} (${esc(formatDate(latest.date))})`
+      : `You've met ${esc(first)} <strong>${n} times</strong>, first ${esc(relative(oldest.date))} and most recently <strong>${esc(relative(latest.date))}</strong>`;
+    overview += latest.place ? ` at ${esc(latest.place)}.` : '.';
+    if (n >= 3) {
+      const gap = daysBetween(oldest.date, latest.date) / (n - 1);
+      if (gap >= 1) overview += ` That's roughly ${describeGap(Math.round(gap))}.`;
+    }
+
+    // Places
+    const placeCounts = new Map();
+    for (const m of meetings) {
+      const key = (m.place || '').trim();
+      if (!key) continue;
+      const k = key.toLowerCase();
+      const e = placeCounts.get(k) || { name: key, count: 0 };
+      e.count++;
+      placeCounts.set(k, e);
+    }
+    const places = [...placeCounts.values()].sort((a, b) => b.count - a.count).slice(0, 4);
+    const placesLine = places.length > 1
+      ? `<p><strong>Usually at:</strong> ${places.map(p => esc(p.name) + (p.count > 1 ? ` (${p.count}×)` : '')).join(', ')}</p>`
+      : '';
+
+    // Things to ask about: plan-like sentences from recent meetings
+    const followUps = [];
+    const seen = new Set();
+    for (const m of meetings.slice(0, 8)) {
+      for (const s of sentences(m.notes)) {
+        const k = s.toLowerCase();
+        if (FOLLOW_UP_RE.test(s) && !seen.has(k)) {
+          seen.add(k);
+          followUps.push({ text: s, date: m.date });
+        }
+      }
+      if (followUps.length >= 5) break;
+    }
+    const followHtml = followUps.length
+      ? `<div class="summary-sub">Things to ask about</div>
+         <ul class="summary-list">${followUps.slice(0, 5).map(f =>
+           `<li>${esc(truncate(f.text, 160))} <span class="meta">(${esc(relative(f.date))})</span></li>`).join('')}</ul>`
+      : '';
+
+    // Last time
+    const lastHtml = `<div class="summary-sub">Last time you met</div>
+      <p class="summary-last">${esc(truncate(latest.notes.replace(/\s+/g, ' '), 280))}</p>`;
+
+    return `
+      <section class="card summary" aria-label="Summary">
+        <div class="summary-title">✨ Summary</div>
+        <p>${overview}</p>
+        ${placesLine}
+        ${followHtml}
+        ${lastHtml}
+      </section>`;
   }
 
   // ---------- Dialogs ----------

@@ -1,5 +1,5 @@
 // Simple offline support: serve from network when available, fall back to cache.
-const CACHE = 'names-meetings-v1';
+const CACHE = 'names-meetings-v2';
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'icon.svg', 'manifest.webmanifest'];
 
 self.addEventListener('install', e => {
